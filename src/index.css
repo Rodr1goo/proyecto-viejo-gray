@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-teal: #0d9488;
+  --color-brand-tealHover: #0f766e;
+  --color-brand-dark: #0f172a;
+  --color-brand-light: #f8fafc;
+  --color-brand-card: #ffffff;
+  --color-brand-text: #334155;
+  --color-brand-muted: #64748b;
+}
+
+body {
+  background-color: var(--color-brand-light);
+  color: var(--color-brand-text);
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar personalizado para estética limpia */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
