@@ -7,6 +7,9 @@ import { useNavigate } from 'react-router-dom';
 
 export default function ListaPreciosPage() {
   const navigate = useNavigate();
+  
+  // Datos simulados (Mock) para estructurar la lista de precios por categoría
+  // Preparado para iterar de la misma forma en que nos devolvería Supabase los datos
   const mockCategories = [
     {
       name: 'Impresión',
@@ -27,21 +30,28 @@ export default function ListaPreciosPage() {
 
   return (
     <div className="space-y-6">
+      {/* ENCABEZADO */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-800">Lista de Precios</h1>
       </div>
 
+      {/* BARRA DE HERRAMIENTAS */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="w-full sm:w-80">
           <InputField placeholder="Buscar servicio..." icon={Search} />
         </div>
+        
+        {/* Botón que navega dinámicamente a la vista de creación de precio */}
         <ActionButton onClick={() => navigate('/prices/new')}>
           <Plus className="w-4 h-4" /> Nuevo Precio
         </ActionButton>
       </div>
 
+      {/* RENDERIZADO DINÁMICO DE CATEGORÍAS */}
       <div>
         {mockCategories.map((cat, idx) => (
+          // Por cada categoría en el arreglo, renderizamos un componente de sección entero.
+          // Le pasamos todo el objeto 'cat' por props.
           <PriceListSection key={idx} category={cat} />
         ))}
       </div>

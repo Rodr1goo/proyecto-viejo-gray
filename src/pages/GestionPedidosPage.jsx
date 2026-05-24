@@ -5,6 +5,8 @@ import ActionButton from '../components/ui/ActionButton';
 import { Search, Plus } from 'lucide-react';
 
 export default function GestionPedidosPage() {
+  // Datos simulados (Mock) agrupados por estado para el tablero Kanban
+  // En la próxima etapa, esto será reemplazado por una consulta a Supabase
   const mockPedidos = [
     {
       status: 'PENDIENTE',
@@ -29,12 +31,15 @@ export default function GestionPedidosPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-6rem)]">
+      {/* ENCABEZADO */}
       <div className="flex items-center justify-between mb-6 shrink-0">
         <h1 className="text-2xl font-bold text-slate-800">Gestión de Pedidos</h1>
       </div>
       
+      {/* BARRA DE HERRAMIENTAS (Buscador y Botón) */}
       <div className="flex flex-wrap items-center justify-between shrink-0 gap-4">
         <div className="w-full max-w-md">
+          {/* Reutilización del componente InputField de nuestra UI global */}
           <InputField placeholder="Buscar por nombre o material..." icon={Search} />
         </div>
         <ActionButton>
@@ -42,6 +47,8 @@ export default function GestionPedidosPage() {
         </ActionButton>
       </div>
 
+      {/* TABLERO KANBAN: Recibe el array de pedidos y se encarga de renderizar 
+          las columnas y las tarjetas internamente */}
       <PedidosTablero pedidos={mockPedidos} />
     </div>
   );

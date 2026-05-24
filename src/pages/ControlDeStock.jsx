@@ -7,7 +7,10 @@ import { Search, Plus, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function ControlDeStock() {
+  // Hook de React Router para poder navegar programáticamente al hacer clic en botones
   const navigate = useNavigate();
+  
+  // Datos simulados (Mock Data). En el futuro, esto provendrá de Supabase mediante un useEffect.
   const mockStock = [
     { name: 'Resmas A4 75g', cat: 'Papel', stock: 45, min: 50, status: 'BAJO STOCK' },
     { name: 'Resmas A4 90g', cat: 'Papel', stock: 30, min: 20, status: 'OK' },
@@ -17,21 +20,27 @@ export default function ControlDeStock() {
 
   return (
     <div className="space-y-6">
+      {/* ENCABEZADO DE LA VISTA */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-800">Control de Stock</h1>
       </div>
 
+      {/* BARRA DE HERRAMIENTAS: Contiene buscador y botón de alta */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <div className="w-full sm:w-64">
+            {/* Componente UI Genérico reutilizado */}
             <InputField placeholder="Buscar insumo..." icon={Search} />
           </div>
         </div>
+        
+        {/* Al hacer clic, navega a la ruta dinámica de creación para cumplir con la consigna de ruteo */}
         <ActionButton onClick={() => navigate('/inventory/new')}>
           <Plus className="w-4 h-4" /> Agregar Insumo
         </ActionButton>
       </div>
 
+      {/* ALERTA VISUAL: Muestra estado crítico del stock */}
       <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex flex-col gap-1">
         <div className="flex items-center gap-2 text-rose-700 font-bold mb-1">
           <AlertTriangle className="w-5 h-5" />
@@ -42,6 +51,7 @@ export default function ControlDeStock() {
         </p>
       </div>
 
+      {/* COMPONENTE FEATURE: Le pasamos los datos mockeados a la tabla para que los mapee */}
       <StockTable items={mockStock} />
     </div>
   );
