@@ -42,7 +42,7 @@ export default function ListaPreciosPage() {
         </div>
         
         {/* Botón que navega dinámicamente a la vista de creación de precio */}
-        <ActionButton onClick={() => navigate('/prices/new')}>
+        <ActionButton onClick={() => navigate('/admin/prices/new')}>
           <Plus className="w-4 h-4" /> Nuevo Precio
         </ActionButton>
       </div>

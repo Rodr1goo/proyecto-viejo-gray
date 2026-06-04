@@ -35,7 +35,7 @@ export default function ControlDeStock() {
         </div>
         
         {/* Al hacer clic, navega a la ruta dinámica de creación para cumplir con la consigna de ruteo */}
-        <ActionButton onClick={() => navigate('/inventory/new')}>
+        <ActionButton onClick={() => navigate('/admin/inventory/new')}>
           <Plus className="w-4 h-4" /> Agregar Insumo
         </ActionButton>
       </div>

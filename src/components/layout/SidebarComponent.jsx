@@ -6,10 +6,10 @@ import clsx from 'clsx';
 // Definimos la configuración de las rutas de navegación lateral
 // Esto permite escalar fácilmente: si queremos agregar una ruta, solo la sumamos a este array.
 const navItems = [
-  { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-  { name: 'Pedidos', path: '/orders', icon: ClipboardList },
-  { name: 'Inventario', path: '/inventory', icon: Package },
-  { name: 'Lista de Precios', path: '/prices', icon: DollarSign },
+  { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
+  { name: 'Pedidos', path: '/admin/orders', icon: ClipboardList },
+  { name: 'Inventario', path: '/admin/inventory', icon: Package },
+  { name: 'Lista de Precios', path: '/admin/prices', icon: DollarSign },
 ];
 
 export default function SidebarComponent({ isOpen, setIsOpen }) {

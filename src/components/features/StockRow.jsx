@@ -19,7 +19,7 @@ export default function StockRow({ item, index }) {
         <StatusBadge status={item.status} />
       </td>
       <td className="px-6 py-4 text-center">
-        <ActionButton variant="icon" onClick={() => navigate(`/inventory/edit/${index + 1}`)}>
+        <ActionButton variant="icon" onClick={() => navigate(`/admin/inventory/edit/${index + 1}`)}>
           <Pencil className="w-4 h-4 mx-auto" />
         </ActionButton>
       </td>

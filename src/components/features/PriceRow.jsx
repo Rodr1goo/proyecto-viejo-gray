@@ -14,7 +14,7 @@ export default function PriceRow({ item, index }) {
         <span className="bg-slate-100 text-slate-500 px-2.5 py-1 rounded text-xs font-medium">{item.unit}</span>
       </td>
       <td className="px-6 py-4 text-center">
-        <ActionButton variant="icon" onClick={() => navigate(`/prices/edit/${index + 1}`)}>
+        <ActionButton variant="icon" onClick={() => navigate(`/admin/prices/edit/${index + 1}`)}>
           <Pencil className="w-4 h-4 mx-auto" />
         </ActionButton>
       </td>

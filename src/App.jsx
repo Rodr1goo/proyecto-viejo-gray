@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-// Importación de Componentes de Layout (Contenedor Maestro)
-import HeaderComponent from './components/layout/HeaderComponent';
-import SidebarComponent from './components/layout/SidebarComponent';
+// Componente Layout que encapsula toda el área protegida/privada
+import AdminLayout from './components/layout/AdminLayout';
 
-// Importación de Páginas (Vistas Inteligentes)
+// Landing Page Pública (Fachada para los estudiantes / consigna)
+import LandingPage from './pages/LandingPage';
+
+// Páginas de Administración (De uso exclusivo interno)
 import Dashboard from './pages/Dashboard';
 import GestionPedidosPage from './pages/GestionPedidosPage';
 import ControlDeStock from './pages/ControlDeStock';
@@ -13,53 +15,41 @@ import ListaPreciosPage from './pages/ListaPreciosPage';
 import FormularioAbmPage from './pages/FormularioAbmPage';
 
 export default function App() {
-  // Estado local para controlar si la barra lateral está abierta en dispositivos móviles
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
   return (
-    // <Router> envuelve toda la aplicación para habilitar la navegación SPA (Single Page Application)
+    // <Router> habilita el manejo de URLs dinámicas sin recargar la página (SPA)
     <Router>
-      <div className="flex h-screen font-sans text-slate-800 overflow-hidden">
+      <Routes>
         
-        {/* SIDEBAR: Componente de navegación lateral. Se pasa el estado para poder abrirlo/cerrarlo */}
-        <SidebarComponent isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+        {/* =========================================
+            ZONA PÚBLICA (Sin protección ni layouts laterales)
+            ========================================= */}
+        {/* La ruta raíz "/" muestra directamente la Landing Page. Es la vidriera pública. */}
+        <Route path="/" element={<LandingPage />} />
         
-        {/* CONTENEDOR PRINCIPAL: Ocupa el resto del ancho de la pantalla */}
-        <div className="flex-1 flex flex-col md:ml-64 overflow-hidden relative">
+        {/* =========================================
+            ZONA DE ADMINISTRACIÓN (Protegida conceptualmente bajo /admin)
+            ========================================= */}
+        {/* Al entrar a "/admin", se renderiza el <AdminLayout />. 
+            Todas las rutas anidadas adentro se renderizarán en el hueco (Outlet) del Layout. */}
+        <Route path="/admin" element={<AdminLayout />}>
           
-          {/* HEADER: Barra superior fija. Recibe la función para alternar la visibilidad del Sidebar */}
-          <HeaderComponent toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+          {/* "index" significa que esta es la ruta por defecto cuando se entra a /admin */}
+          <Route index element={<Dashboard />} />
           
-          {/* ZONA DE CONTENIDO DINÁMICO: Aquí es donde React Router inyectará las páginas según la URL */}
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar">
-            <div className="max-w-7xl mx-auto h-full">
-              
-              {/* <Routes> define el mapeo entre una URL y el componente que debe renderizarse */}
-              <Routes>
-                {/* Rutas Estáticas Básicas */}
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/orders" element={<GestionPedidosPage />} />
-                
-                {/* Rutas de INVENTARIO (Control de Stock) */}
-                <Route path="/inventory" element={<ControlDeStock />} />
-                
-                {/* Rutas Dinámicas de INVENTARIO (URL Params) para preparar el ABM */}
-                {/* 'new' es una ruta estática anidada lógicamente, 'edit/:id' es estrictamente dinámica */}
-                <Route path="/inventory/new" element={<FormularioAbmPage />} />
-                <Route path="/inventory/edit/:id" element={<FormularioAbmPage />} />
-                
-                {/* Rutas de PRECIOS */}
-                <Route path="/prices" element={<ListaPreciosPage />} />
-                
-                {/* Rutas Dinámicas de PRECIOS (URL Params) para preparar el ABM */}
-                <Route path="/prices/new" element={<FormularioAbmPage />} />
-                <Route path="/prices/edit/:id" element={<FormularioAbmPage />} />
-              </Routes>
-              
-            </div>
-          </main>
-        </div>
-      </div>
+          {/* Rutas de módulos administrativos (ej. /admin/orders) */}
+          <Route path="orders" element={<GestionPedidosPage />} />
+          
+          {/* Módulo de Inventario (Listado, Alta y Edición) */}
+          <Route path="inventory" element={<ControlDeStock />} />
+          <Route path="inventory/new" element={<FormularioAbmPage />} />
+          <Route path="inventory/edit/:id" element={<FormularioAbmPage />} />
+          
+          {/* Módulo de Precios (Listado, Alta y Edición) */}
+          <Route path="prices" element={<ListaPreciosPage />} />
+          <Route path="prices/new" element={<FormularioAbmPage />} />
+          <Route path="prices/edit/:id" element={<FormularioAbmPage />} />
+        </Route>
+      </Routes>
     </Router>
   );
 }
