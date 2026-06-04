@@ -1,34 +1,48 @@
 import React from 'react';
 import PedidoCard from './PedidoCard';
 
-// Componente 'Feature': Se encarga exclusivamente de renderizar la lógica visual del Tablero Kanban.
-// Desacopla la lógica pesada de la página principal (GestionPedidosPage), manteniendo el código limpio.
-// Recibe el array completo de 'pedidos' agrupados por estado desde su componente Padre.
-export default function PedidosTablero({ pedidos }) {
+export default function PedidosTablero({ pedidos, onUpdateStatus }) {
+  
+  const handleDragOver = (e) => {
+    e.preventDefault(); // Necesario para permitir el evento drop
+  };
+
+  const handleDrop = (e, targetStatus) => {
+    e.preventDefault();
+    const pedidoId = e.dataTransfer.getData("pedidoId");
+    if (pedidoId && onUpdateStatus) {
+      onUpdateStatus(pedidoId, targetStatus);
+    }
+  };
+
   return (
-    // Contenedor principal con scroll horizontal (útil si hay muchas columnas)
     <div className="flex-1 overflow-x-auto pb-4 custom-scrollbar mt-6">
       <div className="flex gap-6 min-w-max h-full">
-        
-        {/* Iteramos por cada 'columna' del estado (ej: PENDIENTE, EN PROCESO, ENTREGADO) */}
         {pedidos.map((columna, idx) => (
-          <div key={idx} className="flex flex-col w-[300px] shrink-0">
-            
-            {/* Cabecera superior de la columna Kanban */}
-            <div className="flex items-center justify-between mb-4 px-1 border-b border-slate-200 pb-2">
+          <div 
+            key={idx} 
+            className="flex flex-col w-[300px] shrink-0 bg-slate-50/50 rounded-xl p-3 border border-slate-200 shadow-sm"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, columna.status)}
+          >
+            <div className="flex items-center justify-between mb-4 px-1 border-b border-slate-200 pb-3">
               <h3 className="font-bold text-slate-700 text-sm">{columna.status}</h3>
-              {/* Contador de cuántos pedidos hay dentro de esta columna */}
-              <span className="text-xs font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-semibold text-slate-500 bg-slate-200 px-2.5 py-0.5 rounded-full">
                 {columna.items.length}
               </span>
             </div>
             
-            {/* Contenedor vertical de Tarjetas (Cards) */}
-            <div className="space-y-3">
-              {/* Iteramos los items individuales de la columna y delegamos el render a PedidoCard */}
-              {columna.items.map((item, i) => (
-                <PedidoCard key={i} name={item.name} book={item.book} status={columna.status} />
+            <div className="space-y-3 flex-1 min-h-[150px]">
+              {columna.items.map((item) => (
+                <PedidoCard key={item.id} pedido={item} />
               ))}
+              
+              {/* Zona visual si está vacío */}
+              {columna.items.length === 0 && (
+                <div className="h-full border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center text-slate-400 text-sm font-medium opacity-50">
+                  Soltar pedido aquí
+                </div>
+              )}
             </div>
           </div>
         ))}

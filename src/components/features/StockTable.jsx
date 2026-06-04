@@ -3,7 +3,7 @@ import DataTable from '../ui/DataTable';
 import StockRow from './StockRow';
 import Pagination from '../ui/Pagination';
 
-export default function StockTable({ items }) {
+export default function StockTable({ items, onDelete }) {
   return (
     <>
       <div className="bg-white border border-slate-200 rounded-t-xl overflow-hidden shadow-sm">
@@ -13,8 +13,8 @@ export default function StockTable({ items }) {
         </div>
       </div>
       <DataTable headers={['Insumo', 'Categoría', 'Stock Actual', 'Mínimo', 'Estado', 'Acciones']}>
-        {items.map((item, index) => (
-          <StockRow key={index} item={item} index={index} />
+        {items.map((item) => (
+          <StockRow key={item.id} item={item} onDelete={onDelete} />
         ))}
       </DataTable>
       <Pagination />

@@ -1,7 +1,7 @@
 import React from 'react';
 import PriceTable from './PriceTable';
 
-export default function PriceListSection({ category }) {
+export default function PriceListSection({ category, onDelete }) {
   return (
     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm mb-6">
       <div className="p-5 flex items-center justify-between border-b border-slate-100">
@@ -13,7 +13,7 @@ export default function PriceListSection({ category }) {
           {category.name}
         </span>
       </div>
-      <PriceTable items={category.items} />
+      <PriceTable items={category.items} onDelete={onDelete} />
     </div>
   );
 }

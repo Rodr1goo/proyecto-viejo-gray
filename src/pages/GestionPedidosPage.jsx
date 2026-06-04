@@ -1,55 +1,108 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PedidosTablero from '../components/features/PedidosTablero';
 import InputField from '../components/ui/InputField';
 import ActionButton from '../components/ui/ActionButton';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 export default function GestionPedidosPage() {
-  // Datos simulados (Mock) agrupados por estado para el tablero Kanban
-  // En la próxima etapa, esto será reemplazado por una consulta a Supabase
-  const mockPedidos = [
-    {
-      status: 'PENDIENTE',
-      items: [
-        { name: 'María García López', book: 'Atlas de Anatomía Netter' },
-        { name: 'Carlos Rodríguez', book: 'Manual de Fisiología Guyton' }
-      ]
-    },
-    {
-      status: 'EN PROCESO',
-      items: [
-        { name: 'Juan Martínez', book: 'Compendio de Histología' }
-      ]
-    },
-    {
-      status: 'ENTREGADO',
-      items: [
-        { name: 'Diego Moreno', book: 'Patología Robbins Básica' }
-      ]
+  const navigate = useNavigate();
+  const [pedidosRaw, setPedidosRaw] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const fetchPedidos = async () => {
+    try {
+      setIsLoading(true);
+      // Hacemos JOIN con la tabla clientes y con detalles_pedido (y precios para el nombre)
+      const { data, error } = await supabase
+        .from('pedidos')
+        .select(`
+          *,
+          clientes (
+            nombre_referencia,
+            contacto
+          ),
+          detalles_pedido (
+            *,
+            precios (
+              servicio
+            )
+          )
+        `)
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      setPedidosRaw(data || []);
+    } catch (error) {
+      console.error("Error cargando pedidos:", error);
+    } finally {
+      setIsLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchPedidos();
+  }, []);
+
+  const handleUpdateStatus = async (pedidoId, newStatus) => {
+    try {
+      // Carga optimista: actualizamos UI de inmediato
+      setPedidosRaw(prev => prev.map(p => p.id === pedidoId ? { ...p, estado: newStatus } : p));
+      
+      const { error } = await supabase.from('pedidos').update({ estado: newStatus }).eq('id', pedidoId);
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error actualizando estado:", error);
+      fetchPedidos(); // Revertir en caso de error refrescando la BD
+    }
+  };
+
+  // Filtrado
+  const filteredPedidos = pedidosRaw.filter(p => {
+    const searchLower = searchTerm.toLowerCase();
+    const clienteNombre = p.clientes?.nombre_referencia?.toLowerCase() || '';
+    const canal = p.canal_venta?.toLowerCase() || '';
+    return clienteNombre.includes(searchLower) || canal.includes(searchLower);
+  });
+
+  // Agrupar en las 4 columnas
+  const estados = ['PENDIENTE', 'EN PROCESO', 'LISTO PARA RETIRAR', 'ENTREGADO'];
+  const groupedPedidos = estados.map(status => {
+    return {
+      status,
+      items: filteredPedidos.filter(p => p.estado === status)
+    };
+  });
 
   return (
     <div className="flex flex-col h-[calc(100vh-6rem)]">
-      {/* ENCABEZADO */}
       <div className="flex items-center justify-between mb-6 shrink-0">
         <h1 className="text-2xl font-bold text-slate-800">Gestión de Pedidos</h1>
       </div>
       
-      {/* BARRA DE HERRAMIENTAS (Buscador y Botón) */}
       <div className="flex flex-wrap items-center justify-between shrink-0 gap-4">
-        <div className="w-full max-w-md">
-          {/* Reutilización del componente InputField de nuestra UI global */}
-          <InputField placeholder="Buscar por nombre o material..." icon={Search} />
+        <div className="w-full max-w-md relative">
+          <InputField 
+            placeholder="Buscar por cliente o canal..." 
+            icon={Search} 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-        <ActionButton>
+        <ActionButton onClick={() => navigate('/admin/orders/new')}>
           <Plus className="w-4 h-4" /> Nuevo Pedido
         </ActionButton>
       </div>
 
-      {/* TABLERO KANBAN: Recibe el array de pedidos y se encarga de renderizar 
-          las columnas y las tarjetas internamente */}
-      <PedidosTablero pedidos={mockPedidos} />
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12 flex-1">
+          <Loader2 className="w-8 h-8 animate-spin text-brand-teal" />
+        </div>
+      ) : (
+        <PedidosTablero pedidos={groupedPedidos} onUpdateStatus={handleUpdateStatus} />
+      )}
     </div>
   );
 }

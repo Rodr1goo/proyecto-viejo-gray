@@ -13,6 +13,7 @@ import GestionPedidosPage from './pages/GestionPedidosPage';
 import ControlDeStock from './pages/ControlDeStock';
 import ListaPreciosPage from './pages/ListaPreciosPage';
 import FormularioAbmPage from './pages/FormularioAbmPage';
+import FormularioPedidoPage from './pages/FormularioPedidoPage';
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
           
           {/* Rutas de módulos administrativos (ej. /admin/orders) */}
           <Route path="orders" element={<GestionPedidosPage />} />
+          <Route path="orders/new" element={<FormularioPedidoPage />} />
           
           {/* Módulo de Inventario (Listado, Alta y Edición) */}
           <Route path="inventory" element={<ControlDeStock />} />
