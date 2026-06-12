@@ -1,18 +1,25 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Printer, CheckCircle, ChevronDown } from 'lucide-react';
 import StatCard from '../components/ui/StatCard';
 import StatusBadge from '../components/ui/StatusBadge';
 import ActionButton from '../components/ui/ActionButton';
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+
   return (
     // Contenedor principal de la página pública
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 selection:bg-brand-teal selection:text-white">
       
       {/* NAVEGACIÓN PÚBLICA (Sticky para que siempre esté visible al hacer scroll) */}
       <nav className="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="flex items-center gap-3">
+        
+        {/* LOGO CON EASTER EGG SECRETO: Al hacer doble click te lleva al admin */}
+        <div 
+          className="flex items-center gap-3 cursor-default select-none"
+          onDoubleClick={() => navigate('/login')}
+        >
           <span className="w-10 h-10 rounded bg-brand-teal flex items-center justify-center text-white font-black text-sm shadow-md shadow-brand-teal/20">VG</span>
           <span className="font-bold text-xl tracking-tight text-slate-800">El Viejo Gray</span>
         </div>
@@ -24,11 +31,8 @@ export default function LandingPage() {
           <a href="#showcase" className="hover:text-brand-teal transition-colors">Componentes</a>
         </div>
         
-        {/* BOTÓN CRÍTICO: Este enlace dirige a los administradores a la ruta privada (/admin).
-            En el futuro, interceptaremos esta ruta con una pantalla de Login. */}
-        <Link to="/admin" className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all">
-          Acceso Admin
-        </Link>
+        {/* El botón obvio de Acceso Admin fue eliminado para mantener el secreto. */}
+        <div className="w-24"></div> {/* Espaciador para mantener el balance flex */}
       </nav>
 
       {/* HERO SECTION: La primera impresión visual con el CTA principal (WhatsApp) */}
