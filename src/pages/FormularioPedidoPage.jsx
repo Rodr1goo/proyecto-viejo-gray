@@ -9,7 +9,7 @@ export default function FormularioPedidoPage() {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [preciosDB, setPreciosDB] = useState([]);
-  
+
   // 1. Estado del Cliente
   const [cliente, setCliente] = useState({
     nombre_referencia: '',
@@ -38,7 +38,7 @@ export default function FormularioPedidoPage() {
     setDetalles(prev => prev.map(item => {
       if (item.id_local === id_local) {
         let updatedItem = { ...item, [field]: value };
-        
+
         // Si el usuario seleccionó un nuevo servicio, actualizamos el precio unitario y la categoría
         if (field === 'precio_id') {
           const servicioSeleccionado = preciosDB.find(p => p.id === value);
@@ -50,7 +50,7 @@ export default function FormularioPedidoPage() {
             updatedItem.categoria = '';
           }
         }
-        
+
         // Recalcular subtotal si cambió la cantidad o el precio
         updatedItem.subtotal = updatedItem.cantidad * updatedItem.precio_unitario;
         return updatedItem;
@@ -75,7 +75,7 @@ export default function FormularioPedidoPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!cliente.nombre_referencia) return alert('El nombre del cliente es obligatorio');
-    
+
     // Validar que todos los detalles tengan un servicio seleccionado
     const detallesIncompletos = detalles.some(d => !d.precio_id);
     if (detallesIncompletos) return alert('Por favor, selecciona un servicio para cada ítem del pedido');
@@ -85,7 +85,7 @@ export default function FormularioPedidoPage() {
 
       // PASO 1: Buscar o Crear Cliente
       let cliente_id = null;
-      
+
       // Intentamos buscar por el contacto (si lo escribió)
       if (cliente.contacto) {
         const { data: clienteExistente } = await supabase
@@ -93,7 +93,7 @@ export default function FormularioPedidoPage() {
           .select('id')
           .eq('contacto', cliente.contacto)
           .maybeSingle(); // maybeSingle para no lanzar error si no existe
-          
+
         if (clienteExistente) {
           cliente_id = clienteExistente.id;
         }
@@ -106,7 +106,7 @@ export default function FormularioPedidoPage() {
           .insert([{ nombre_referencia: cliente.nombre_referencia, contacto: cliente.contacto }])
           .select()
           .single();
-          
+
         if (errorCliente) throw new Error("Error al crear cliente: " + errorCliente.message);
         cliente_id = nuevoCliente.id;
       }
@@ -160,7 +160,7 @@ export default function FormularioPedidoPage() {
     <div className="max-w-4xl mx-auto py-6 pb-24">
       {/* Encabezado */}
       <div className="flex items-center gap-4 mb-8">
-        <button 
+        <button
           onClick={() => navigate(-1)}
           className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"
         >
@@ -173,35 +173,35 @@ export default function FormularioPedidoPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        
+
         {/* BLOQUE 1: DATOS DEL CLIENTE Y PEDIDO */}
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
             <User className="w-5 h-5 text-brand-teal" /> Datos Generales
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="col-span-1">
               <label className="block text-sm font-semibold text-slate-700 mb-2">Nombre / Apodo *</label>
-              <InputField 
-                placeholder="Ej. Juan Pérez" 
+              <InputField
+                placeholder="Ej. Juan Pérez"
                 value={cliente.nombre_referencia}
-                onChange={(e) => setCliente({...cliente, nombre_referencia: e.target.value})}
+                onChange={(e) => setCliente({ ...cliente, nombre_referencia: e.target.value })}
                 required
               />
             </div>
             <div className="col-span-1">
               <label className="block text-sm font-semibold text-slate-700 mb-2">Contacto (IG/Tel)</label>
-              <InputField 
-                placeholder="Ej. @juanperez o 381..." 
+              <InputField
+                placeholder="Ej. @juanperez o 381..."
                 icon={Phone}
                 value={cliente.contacto}
-                onChange={(e) => setCliente({...cliente, contacto: e.target.value})}
+                onChange={(e) => setCliente({ ...cliente, contacto: e.target.value })}
               />
             </div>
             <div className="col-span-1">
               <label className="block text-sm font-semibold text-slate-700 mb-2">Canal de Venta</label>
-              <select 
+              <select
                 className="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition-all outline-none"
                 value={canalVenta}
                 onChange={(e) => setCanalVenta(e.target.value)}
@@ -220,8 +220,8 @@ export default function FormularioPedidoPage() {
             <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
               <ShoppingCart className="w-5 h-5 text-brand-teal" /> Detalles del Pedido
             </h2>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={agregarDetalle}
               className="text-brand-teal font-semibold text-sm flex items-center gap-1 hover:text-brand-tealHover"
             >
@@ -232,10 +232,10 @@ export default function FormularioPedidoPage() {
           <div className="space-y-4">
             {detalles.map((detalle, index) => (
               <div key={detalle.id_local} className="p-4 border border-slate-100 bg-slate-50 rounded-xl relative">
-                
+
                 {detalles.length > 1 && (
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => eliminarDetalle(detalle.id_local)}
                     className="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition-colors"
                   >
@@ -247,7 +247,7 @@ export default function FormularioPedidoPage() {
                   {/* Fila 1: Servicio, Cantidad y Subtotal */}
                   <div className="col-span-1 md:col-span-7">
                     <label className="block text-xs font-semibold text-slate-500 mb-1">Servicio *</label>
-                    <select 
+                    <select
                       className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:border-brand-teal outline-none"
                       value={detalle.precio_id}
                       onChange={(e) => handleDetalleChange(detalle.id_local, 'precio_id', e.target.value)}
@@ -259,10 +259,10 @@ export default function FormularioPedidoPage() {
                       ))}
                     </select>
                   </div>
-                  
+
                   <div className="col-span-1 md:col-span-2">
                     <label className="block text-xs font-semibold text-slate-500 mb-1">Cantidad *</label>
-                    <input 
+                    <input
                       type="number"
                       min="1"
                       className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:border-brand-teal outline-none"
@@ -279,7 +279,7 @@ export default function FormularioPedidoPage() {
                   {/* Fila 2: Descripción Adicional (ancho completo) */}
                   <div className="col-span-1 md:col-span-12 mt-2">
                     <label className="block text-xs font-semibold text-slate-500 mb-1">Detalle / Notas (Opcional)</label>
-                    <textarea 
+                    <textarea
                       className="w-full p-3 rounded-lg border border-slate-200 text-sm focus:border-brand-teal outline-none resize-none custom-scrollbar"
                       rows="2"
                       placeholder="Ej. Anillado color negro, tapa transparente, retirar a las 15hs..."
