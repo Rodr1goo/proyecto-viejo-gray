@@ -37,14 +37,14 @@ El proyecto sigue el estándar de oro en estructura React:
 - `/pages/` (Vistas completas).
 - `/lib/` (Instancia cliente de Supabase).
 
-## 🛠️ Tecnologías Utilizadas
+## Tecnologías Utilizadas
 *   **Core:** React 19 + Vite
 *   **Estilos:** Tailwind CSS v4
 *   **Enrutamiento:** React Router DOM (Data Router API)
 *   **Backend & DB:** Supabase (PostgreSQL + API REST automatizada)
 *   **Iconografía:** Lucide React
 
-## 📦 Instalación y Ejecución Local
+## Instalación y Ejecución Local
 
 1. Clonar el repositorio.
 2. Crear un archivo `.env.local` en la raíz del proyecto basándose en las credenciales proporcionadas.

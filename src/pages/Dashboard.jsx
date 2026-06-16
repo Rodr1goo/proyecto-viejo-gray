@@ -3,7 +3,7 @@ import StatCard from '../components/ui/StatCard';
 import DataTable from '../components/ui/DataTable';
 import DataRow from '../components/ui/DataRow';
 import StatusBadge from '../components/ui/StatusBadge';
-import { ClipboardList, AlertTriangle, DollarSign, TrendingUp, Loader2 } from 'lucide-react';
+import { ClipboardList, AlertTriangle, DollarSign, TrendingUp, Loader2, Receipt } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
 export default function Dashboard() {
@@ -12,10 +12,14 @@ export default function Dashboard() {
   // ============================================================================
   const [metrics, setMetrics] = useState({
     pedidosHoy: 0,
+    pedidosMes: 0,
     insumosCriticos: 0,
     ventasDia: 0,
-    enProduccion: 0
+    ventasMes: 0,
+    enProduccion: 0,
+    ticketPromedio: 0
   });
+
   const [recentOrders, setRecentOrders] = useState([]);
   const [criticalInsumos, setCriticalInsumos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,11 +32,8 @@ export default function Dashboard() {
       try {
         setIsLoading(true);
 
-        // 1. Ejecutamos ambas consultas a Supabase en paralelo para mayor velocidad
         const [pedidosResponse, insumosResponse] = await Promise.all([
-          // Obtenemos los pedidos junto con el nombre del cliente (usando JOIN)
           supabase.from('pedidos').select('*, clientes(nombre_referencia)').order('created_at', { ascending: false }),
-          // Obtenemos todos los insumos para calcular cuáles están en stock crítico
           supabase.from('insumos').select('*')
         ]);
 
@@ -43,13 +44,27 @@ export default function Dashboard() {
         const insumos = insumosResponse.data || [];
 
         // 2. Calculamos las métricas dinámicamente
-        const hoy = new Date().toDateString();
+        const hoyDate = new Date();
+        const hoy = hoyDate.toDateString();
+        const mesActual = hoyDate.getMonth();
+        const anioActual = hoyDate.getFullYear();
 
         // Filtrar pedidos creados en el día de hoy
-        const pedidosDeHoy = pedidos.filter(p => new Date(p.created_at).toDateString() === hoy);
+        const pedidosDeHoy = pedidos.filter(p => p.created_at && new Date(p.created_at).toDateString() === hoy);
         
-        // Sumar el total de los pedidos de hoy para la métrica de ventas
+        // Filtrar pedidos del mes actual
+        const pedidosDelMes = pedidos.filter(p => {
+          if (!p.created_at) return false;
+          const date = new Date(p.created_at);
+          return date.getMonth() === mesActual && date.getFullYear() === anioActual;
+        });
+        
+        // Sumar el total de los pedidos para métricas financieras
         const ventasDelDia = pedidosDeHoy.reduce((suma, p) => suma + Number(p.total || 0), 0);
+        const ventasDelMes = pedidosDelMes.reduce((suma, p) => suma + Number(p.total || 0), 0);
+        
+        // Calcular el Ticket Promedio
+        const ticketPromedio = pedidosDelMes.length > 0 ? Math.round(ventasDelMes / pedidosDelMes.length) : 0;
         
         // Contar pedidos que están actualmente "EN PROCESO"
         const enProduccion = pedidos.filter(p => p.estado === 'EN PROCESO').length;
@@ -57,17 +72,22 @@ export default function Dashboard() {
         // Filtrar insumos cuyo stock actual ha caído al mínimo o por debajo
         const insumosEnAlerta = insumos.filter(i => i.stock_actual <= i.stock_minimo);
 
+
+
         // Actualizamos el estado con las métricas calculadas
         setMetrics({
           pedidosHoy: pedidosDeHoy.length,
+          pedidosMes: pedidosDelMes.length,
           insumosCriticos: insumosEnAlerta.length,
           ventasDia: ventasDelDia,
-          enProduccion: enProduccion
+          ventasMes: ventasDelMes,
+          enProduccion: enProduccion,
+          ticketPromedio: ticketPromedio
         });
 
-        // Guardamos las listas para las tablas
+
         setRecentOrders(pedidos.slice(0, 5));
-        setCriticalInsumos(insumosEnAlerta); // Guardamos la lista de insumos críticos
+        setCriticalInsumos(insumosEnAlerta); 
 
       } catch (error) {
         console.error("Error cargando datos del dashboard:", error);
@@ -84,10 +104,15 @@ export default function Dashboard() {
   // ============================================================================
   const statData = [
     { id: 1, titulo: "Pedidos de Hoy", valor: metrics.pedidosHoy.toString(), icon: ClipboardList },
-    { id: 2, titulo: "Insumos Críticos", valor: metrics.insumosCriticos.toString(), icon: AlertTriangle },
-    { id: 3, titulo: "Ventas del Día", valor: `$${metrics.ventasDia.toLocaleString()}`, icon: DollarSign },
-    { id: 4, titulo: "En Producción", valor: metrics.enProduccion.toString(), icon: TrendingUp },
+    { id: 2, titulo: "Pedidos del Mes", valor: metrics.pedidosMes.toString(), icon: ClipboardList },
+    { id: 3, titulo: "En Producción", valor: metrics.enProduccion.toString(), icon: TrendingUp },
+    { id: 4, titulo: "Insumos Críticos", valor: metrics.insumosCriticos.toString(), icon: AlertTriangle },
+    { id: 5, titulo: "Ventas del Día", valor: `$${metrics.ventasDia.toLocaleString()}`, icon: DollarSign },
+    { id: 6, titulo: "Ventas del Mes", valor: `$${metrics.ventasMes.toLocaleString()}`, icon: DollarSign },
+    { id: 7, titulo: "Ticket Promedio", valor: `$${metrics.ticketPromedio.toLocaleString()}`, icon: Receipt },
   ];
+
+
 
   // ============================================================================
   // INTERFAZ DE USUARIO (RENDER)
@@ -105,7 +130,7 @@ export default function Dashboard() {
       ) : (
         <>
           {/* Grid de Tarjetas de Estadísticas (StatCards) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {statData.map((stat) => (
               <StatCard key={stat.id} titulo={stat.titulo} valor={stat.valor} icono={stat.icon} />
             ))}

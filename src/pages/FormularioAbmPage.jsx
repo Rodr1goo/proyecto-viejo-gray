@@ -188,7 +188,6 @@ export default function FormularioAbmPage() {
                 >
                   <option value="por hoja">Por hoja</option>
                   <option value="por unidad">Por unidad</option>
-                  <option value="por metro">Por metro</option>
                 </select>
               </div>
             </div>
