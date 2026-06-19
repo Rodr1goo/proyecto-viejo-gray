@@ -29,13 +29,13 @@ Se ha refactorizado la aplicación para utilizar la API de Enrutamiento de Datos
 *   **Cálculo de Métricas:** Paneles matemáticos en tiempo real para "Ventas del Día" e "Insumos Críticos".
 *   **Diseño Expandible:** Tarjetas Kanban con efecto acordeón para revelar el detalle completo del carrito de compras de cada cliente.
 
-### 5. Arquitectura Escalar 
-El proyecto sigue el estándar de oro en estructura React:
+### 5. Arquitectura Escalar y Patrón Service Layer
+El proyecto sigue el estándar de oro en estructura React, habiendo desacoplado la lógica de negocio de la interfaz gráfica:
 - `/components/ui/` (Botones, Inputs, Badges genéricos).
 - `/components/features/` (Kanban, Tablas, Filas interactivas).
 - `/components/layout/` (Sidebar, Navbar, ProtectedRoute).
-- `/pages/` (Vistas completas).
-- `/lib/` (Instancia cliente de Supabase).
+- `/pages/` (Vistas completas - Dumb Components).
+- `/lib/` (**Capa de Servicios**: Encapsula la lógica transaccional y el cliente de Supabase).
 
 ## Tecnologías Utilizadas
 *   **Core:** React 19 + Vite

@@ -1,6 +1,19 @@
 import { supabase } from './supabaseClient';
 
+/**
+ * ============================================================================
+ * SERVICIO: PEDIDOS Y TRANSACCIONES
+ * ============================================================================
+ * Maneja el núcleo del sistema: la gestión del Kanban y la creación
+ * de órdenes de trabajo (que involucra múltiples tablas simultáneamente).
+ */
 export const pedidosService = {
+  
+  /**
+   * Obtiene todos los pedidos junto con la información cruzada (JOINs)
+   * del cliente y del detalle de los precios solicitados.
+   * Utilizado para alimentar el Tablero Kanban.
+   */
   async obtenerPedidos() {
     const { data, error } = await supabase
       .from('pedidos')
@@ -23,6 +36,10 @@ export const pedidosService = {
     return data;
   },
 
+  /**
+   * Actualiza únicamente la columna "estado" de un pedido.
+   * Ideal para la acción de arrastrar y soltar (Drag & Drop) en el Kanban.
+   */
   async actualizarEstadoPedido(id, nuevoEstado) {
     const { error } = await supabase
       .from('pedidos')
@@ -31,8 +48,17 @@ export const pedidosService = {
     if (error) throw error;
   },
 
+  /**
+   * Transacción Maestra (Multi-capa).
+   * Se encarga de:
+   * 1. Buscar si el cliente existe por contacto, o crearlo si es nuevo.
+   * 2. Crear la cabecera del pedido vinculada al cliente.
+   * 3. Insertar el array de servicios solicitados (detalles) vinculados al pedido.
+   * 
+   * Todo esto se maneja desde el servicio para evitar lógica pesada en la UI.
+   */
   async crearPedidoCompleto(clienteData, pedidoData, detallesParaInsertar) {
-    // 1. Manejo del Cliente (Buscar o Crear)
+    // PASO 1: Manejo del Cliente (Buscar o Crear)
     let cliente_id = null;
     if (clienteData.contacto) {
       const { data } = await supabase
@@ -54,7 +80,7 @@ export const pedidosService = {
       cliente_id = nuevoCliente.id;
     }
 
-    // 2. Crear Pedido
+    // PASO 2: Crear la cabecera del Pedido
     const { data: nuevoPedido, error: errorPedido } = await supabase
       .from('pedidos')
       .insert([{ ...pedidoData, cliente_id }])
@@ -63,7 +89,7 @@ export const pedidosService = {
       
     if (errorPedido) throw new Error("Error al crear pedido: " + errorPedido.message);
 
-    // 3. Crear Detalles del Pedido
+    // PASO 3: Crear los Detalles del Pedido (Carrito)
     const detallesConPedidoId = detallesParaInsertar.map(d => ({ ...d, pedido_id: nuevoPedido.id }));
     const { error: errorDetalles } = await supabase
       .from('detalles_pedido')
