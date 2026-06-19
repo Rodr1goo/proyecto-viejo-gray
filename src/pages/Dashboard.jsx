@@ -4,8 +4,7 @@ import DataTable from '../components/ui/DataTable';
 import DataRow from '../components/ui/DataRow';
 import StatusBadge from '../components/ui/StatusBadge';
 import { ClipboardList, AlertTriangle, DollarSign, TrendingUp, Loader2, Receipt } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
-
+import { dashboardService } from '../lib/dashboardService';
 export default function Dashboard() {
   // ============================================================================
   // ESTADOS DEL COMPONENTE
@@ -32,16 +31,9 @@ export default function Dashboard() {
       try {
         setIsLoading(true);
 
-        const [pedidosResponse, insumosResponse] = await Promise.all([
-          supabase.from('pedidos').select('*, clientes(nombre_referencia)').order('created_at', { ascending: false }),
-          supabase.from('insumos').select('*')
-        ]);
-
-        if (pedidosResponse.error) throw pedidosResponse.error;
-        if (insumosResponse.error) throw insumosResponse.error;
-
-        const pedidos = pedidosResponse.data || [];
-        const insumos = insumosResponse.data || [];
+        const data = await dashboardService.obtenerDatosDashboard();
+        const pedidos = data.pedidos;
+        const insumos = data.insumos;
 
         // 2. Calculamos las métricas dinámicamente
         const hoyDate = new Date();

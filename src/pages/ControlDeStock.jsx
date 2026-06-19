@@ -5,8 +5,7 @@ import ActionButton from '../components/ui/ActionButton';
 import StatusBadge from '../components/ui/StatusBadge';
 import { Search, Plus, AlertTriangle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
-
+import { insumosService } from '../lib/insumosService';
 export default function ControlDeStock() {
   const navigate = useNavigate();
   const [insumos, setInsumos] = useState([]);
@@ -16,8 +15,7 @@ export default function ControlDeStock() {
   const fetchInsumos = async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.from('insumos').select('*').order('nombre');
-      if (error) throw error;
+      const data = await insumosService.obtenerInsumos();
       
       // Mapear el estado (status) al vuelo
       const mappedData = data.map(insumo => ({
@@ -39,8 +37,7 @@ export default function ControlDeStock() {
   const handleDelete = async (id) => {
     if (!window.confirm('¿Seguro que deseas eliminar este insumo?')) return;
     try {
-      const { error } = await supabase.from('insumos').delete().eq('id', id);
-      if (error) throw error;
+      await insumosService.eliminarInsumo(id);
       fetchInsumos(); // Recargar tras borrar
     } catch (error) {
       console.error("Error eliminando:", error);

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ActionButton from '../components/ui/ActionButton';
-import { supabase } from '../lib/supabaseClient';
-
+import { insumosService } from '../lib/insumosService';
+import { preciosService } from '../lib/preciosService';
 export default function FormularioAbmPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -32,23 +32,31 @@ export default function FormularioAbmPage() {
     if (isEditing) {
       if (isInventory) {
         const fetchInsumo = async () => {
-          const { data, error } = await supabase.from('insumos').select('*').eq('id', id).single();
-          if (data && !error) {
-            setNombre(data.nombre);
-            setCategoriaInsumo(data.categoria || '');
-            setStockActual(data.stock_actual);
-            setStockMinimo(data.stock_minimo);
+          try {
+            const data = await insumosService.obtenerInsumoPorId(id);
+            if (data) {
+              setNombre(data.nombre);
+              setCategoriaInsumo(data.categoria || '');
+              setStockActual(data.stock_actual);
+              setStockMinimo(data.stock_minimo);
+            }
+          } catch (error) {
+            console.error(error);
           }
         };
         fetchInsumo();
       } else if (isPrices) {
         const fetchPrecio = async () => {
-          const { data, error } = await supabase.from('precios').select('*').eq('id', id).single();
-          if (data && !error) {
-            setServicio(data.servicio);
-            setCategoriaPrecio(data.categoria || '');
-            setPrecio(data.precio);
-            setUnidad(data.unidad || 'por unidad');
+          try {
+            const data = await preciosService.obtenerPrecioPorId(id);
+            if (data) {
+              setServicio(data.servicio);
+              setCategoriaPrecio(data.categoria || '');
+              setPrecio(data.precio);
+              setUnidad(data.unidad || 'por unidad');
+            }
+          } catch (error) {
+            console.error(error);
           }
         };
         fetchPrecio();
@@ -70,11 +78,9 @@ export default function FormularioAbmPage() {
         };
 
         if (isEditing) {
-          const { error } = await supabase.from('insumos').update(insumoData).eq('id', id);
-          if (error) throw error;
+          await insumosService.actualizarInsumo(id, insumoData);
         } else {
-          const { error } = await supabase.from('insumos').insert([insumoData]);
-          if (error) throw error;
+          await insumosService.crearInsumo(insumoData);
         }
         
         navigate('/admin/inventory');
@@ -87,11 +93,9 @@ export default function FormularioAbmPage() {
         };
 
         if (isEditing) {
-          const { error } = await supabase.from('precios').update(precioData).eq('id', id);
-          if (error) throw error;
+          await preciosService.actualizarPrecio(id, precioData);
         } else {
-          const { error } = await supabase.from('precios').insert([precioData]);
-          if (error) throw error;
+          await preciosService.crearPrecio(precioData);
         }
         
         navigate('/admin/prices');

@@ -3,7 +3,7 @@ import PedidosTablero from '../components/features/PedidosTablero';
 import InputField from '../components/ui/InputField';
 import ActionButton from '../components/ui/ActionButton';
 import { Search, Plus, Loader2 } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
+import { pedidosService } from '../lib/pedidosService';
 import { useNavigate } from 'react-router-dom';
 
 export default function GestionPedidosPage() {
@@ -15,25 +15,7 @@ export default function GestionPedidosPage() {
   const fetchPedidos = async () => {
     try {
       setIsLoading(true);
-      // Hacemos JOIN con la tabla clientes y con detalles_pedido (y precios para el nombre)
-      const { data, error } = await supabase
-        .from('pedidos')
-        .select(`
-          *,
-          clientes (
-            nombre_referencia,
-            contacto
-          ),
-          detalles_pedido (
-            *,
-            precios (
-              servicio
-            )
-          )
-        `)
-        .order('created_at', { ascending: false });
-        
-      if (error) throw error;
+      const data = await pedidosService.obtenerPedidos();
       setPedidosRaw(data || []);
     } catch (error) {
       console.error("Error cargando pedidos:", error);
@@ -51,8 +33,7 @@ export default function GestionPedidosPage() {
       // Carga optimista: actualizamos UI de inmediato
       setPedidosRaw(prev => prev.map(p => p.id === pedidoId ? { ...p, estado: newStatus } : p));
       
-      const { error } = await supabase.from('pedidos').update({ estado: newStatus }).eq('id', pedidoId);
-      if (error) throw error;
+      await pedidosService.actualizarEstadoPedido(pedidoId, newStatus);
     } catch (error) {
       console.error("Error actualizando estado:", error);
       fetchPedidos(); // Revertir en caso de error refrescando la BD

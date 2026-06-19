@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Plus, Trash2, Loader2, User, Phone, ShoppingCart } from 'lucide-react';
 import InputField from '../components/ui/InputField';
 import ActionButton from '../components/ui/ActionButton';
-import { supabase } from '../lib/supabaseClient';
-
+import { preciosService } from '../lib/preciosService';
+import { pedidosService } from '../lib/pedidosService';
 export default function FormularioPedidoPage() {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
@@ -27,8 +27,12 @@ export default function FormularioPedidoPage() {
   // Cargar lista de precios al montar el componente
   useEffect(() => {
     async function fetchPrecios() {
-      const { data } = await supabase.from('precios').select('*').order('servicio');
-      if (data) setPreciosDB(data);
+      try {
+        const data = await preciosService.obtenerPrecios();
+        if (data) setPreciosDB(data);
+      } catch (error) {
+        console.error("Error cargando precios:", error);
+      }
     }
     fetchPrecios();
   }, []);
@@ -83,66 +87,24 @@ export default function FormularioPedidoPage() {
     try {
       setIsSaving(true);
 
-      // PASO 1: Buscar o Crear Cliente
-      let cliente_id = null;
+      const pedidoData = {
+        canal_venta: canalVenta,
+        estado: 'PENDIENTE',
+        total: totalPedido,
+        abonado: 0
+      };
 
-      // Intentamos buscar por el contacto (si lo escribió)
-      if (cliente.contacto) {
-        const { data: clienteExistente } = await supabase
-          .from('clientes')
-          .select('id')
-          .eq('contacto', cliente.contacto)
-          .maybeSingle(); // maybeSingle para no lanzar error si no existe
-
-        if (clienteExistente) {
-          cliente_id = clienteExistente.id;
-        }
-      }
-
-      // Si no existe, lo creamos
-      if (!cliente_id) {
-        const { data: nuevoCliente, error: errorCliente } = await supabase
-          .from('clientes')
-          .insert([{ nombre_referencia: cliente.nombre_referencia, contacto: cliente.contacto }])
-          .select()
-          .single();
-
-        if (errorCliente) throw new Error("Error al crear cliente: " + errorCliente.message);
-        cliente_id = nuevoCliente.id;
-      }
-
-      // PASO 2: Crear el Pedido
-      const { data: nuevoPedido, error: errorPedido } = await supabase
-        .from('pedidos')
-        .insert([{
-          cliente_id: cliente_id,
-          canal_venta: canalVenta,
-          estado: 'PENDIENTE',
-          total: totalPedido,
-          abonado: 0 // Por defecto arranca en 0
-        }])
-        .select()
-        .single();
-
-      if (errorPedido) throw new Error("Error al crear pedido: " + errorPedido.message);
-
-      // PASO 3: Crear los Detalles del Pedido
-      // Preparamos el array para la BD (quitando id_local y mapeando las columnas correctas)
-      const detallesParaInsertar = detalles.map(d => ({
-        pedido_id: nuevoPedido.id,
+      const detallesProcesados = detalles.map(d => ({
         precio_id: d.precio_id,
         categoria: d.categoria || 'General',
-        tipo_impresion: 'No aplica', // Por ahora lo dejamos por defecto
+        tipo_impresion: 'No aplica',
         descripcion: d.descripcion,
         cantidad: d.cantidad,
         subtotal: d.subtotal
       }));
 
-      const { error: errorDetalles } = await supabase
-        .from('detalles_pedido')
-        .insert(detallesParaInsertar);
-
-      if (errorDetalles) throw new Error("Error al crear detalles: " + errorDetalles.message);
+      // Usar el servicio que maneja toda la transacción
+      await pedidosService.crearPedidoCompleto(cliente, pedidoData, detallesProcesados);
 
       // ¡Todo un éxito!
       alert("¡Pedido creado exitosamente!");

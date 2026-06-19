@@ -4,8 +4,7 @@ import InputField from '../components/ui/InputField';
 import ActionButton from '../components/ui/ActionButton';
 import { Search, Plus, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
-
+import { preciosService } from '../lib/preciosService';
 export default function ListaPreciosPage() {
   const navigate = useNavigate();
   const [allPrecios, setAllPrecios] = useState([]);
@@ -15,8 +14,7 @@ export default function ListaPreciosPage() {
   const fetchPrecios = async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.from('precios').select('*').order('categoria').order('servicio');
-      if (error) throw error;
+      const data = await preciosService.obtenerPrecios();
       setAllPrecios(data || []);
     } catch (error) {
       console.error("Error al cargar precios:", error);
@@ -32,8 +30,7 @@ export default function ListaPreciosPage() {
   const handleDelete = async (id) => {
     if (!window.confirm('¿Seguro que deseas eliminar este servicio?')) return;
     try {
-      const { error } = await supabase.from('precios').delete().eq('id', id);
-      if (error) throw error;
+      await preciosService.eliminarPrecio(id);
       fetchPrecios();
     } catch (error) {
       console.error("Error eliminando:", error);
