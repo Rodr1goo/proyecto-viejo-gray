@@ -3,7 +3,7 @@ import React from 'react';
 // Componente atómico y global de UI: Botón estandarizado.
 // Recibe 'children' (el texto o icono interno), 'onClick' (la función a ejecutar), 
 // y 'variant' (estilo del botón, por defecto "primary").
-export default function ActionButton({ children, onClick, variant = "primary" }) {
+export default function ActionButton({ children, onClick, variant = "primary", ...props }) {
   
   // Clases base compartidas por todos los botones (flexbox, padding, bordes redondeados y efectos focus)
   const baseClasses = "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-brand-teal";
@@ -18,7 +18,11 @@ export default function ActionButton({ children, onClick, variant = "primary" })
 
   return (
     // Se concatenan dinámicamente las clases base con las clases correspondientes a la variante elegida
-    <button onClick={onClick} className={`${baseClasses} ${variants[variant]}`}>
+    <button 
+      onClick={onClick} 
+      className={`${baseClasses} ${variants[variant]} disabled:opacity-50 disabled:cursor-not-allowed`}
+      {...props}
+    >
       {children}
     </button>
   );

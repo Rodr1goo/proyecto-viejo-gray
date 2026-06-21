@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import ActionButton from '../components/ui/ActionButton';
+import InputField from '../components/ui/InputField';
+import SelectField from '../components/ui/SelectField';
 import { insumosService } from '../lib/insumosService';
 import { preciosService } from '../lib/preciosService';
 export default function FormularioAbmPage() {
@@ -117,83 +119,60 @@ export default function FormularioAbmPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {isInventory && (
           <div className="space-y-4 text-left">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Nombre del Insumo</label>
-              <input 
-                type="text" required
-                value={nombre} onChange={e => setNombre(e.target.value)}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent" 
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Categoría</label>
-              <input 
-                type="text" 
-                value={categoriaInsumo} onChange={e => setCategoriaInsumo(e.target.value)}
-                placeholder="Ej: Papel, Encuadernación, Tóner"
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent" 
-              />
-            </div>
+            <InputField 
+              label="Nombre del Insumo"
+              type="text" required
+              value={nombre} onChange={e => setNombre(e.target.value)}
+            />
+            <InputField 
+              label="Categoría"
+              type="text" 
+              value={categoriaInsumo} onChange={e => setCategoriaInsumo(e.target.value)}
+              placeholder="Ej: Papel, Encuadernación, Tóner"
+            />
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Stock Actual</label>
-                <input 
-                  type="number" required min="0"
-                  value={stockActual} onChange={e => setStockActual(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent" 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Stock Mínimo (Alerta)</label>
-                <input 
-                  type="number" required min="0"
-                  value={stockMinimo} onChange={e => setStockMinimo(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent" 
-                />
-              </div>
+              <InputField 
+                label="Stock Actual"
+                type="number" required min="0"
+                value={stockActual} onChange={e => setStockActual(e.target.value)}
+              />
+              <InputField 
+                label="Stock Mínimo (Alerta)"
+                type="number" required min="0"
+                value={stockMinimo} onChange={e => setStockMinimo(e.target.value)}
+              />
             </div>
           </div>
         )}
 
         {isPrices && (
           <div className="space-y-4 text-left">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Nombre del Servicio</label>
-              <input 
-                type="text" required
-                value={servicio} onChange={e => setServicio(e.target.value)}
-                placeholder="Ej: Impresión B/N Simple faz"
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent" 
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Categoría</label>
-              <input 
-                type="text" required
-                value={categoriaPrecio} onChange={e => setCategoriaPrecio(e.target.value)}
-                placeholder="Ej: Impresión, Encuadernación"
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent" 
-              />
-            </div>
+            <InputField 
+              label="Nombre del Servicio"
+              type="text" required
+              value={servicio} onChange={e => setServicio(e.target.value)}
+              placeholder="Ej: Impresión B/N Simple faz"
+            />
+            <InputField 
+              label="Categoría"
+              type="text" required
+              value={categoriaPrecio} onChange={e => setCategoriaPrecio(e.target.value)}
+              placeholder="Ej: Impresión, Encuadernación"
+            />
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Precio ($)</label>
-                <input 
-                  type="number" required min="0" step="0.01"
-                  value={precio} onChange={e => setPrecio(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent" 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Unidad de Medida</label>
-                <select 
-                  value={unidad} onChange={e => setUnidad(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent bg-white"
-                >
-                  <option value="por hoja">Por hoja</option>
-                  <option value="por unidad">Por unidad</option>
-                </select>
-              </div>
+              <InputField 
+                label="Precio ($)"
+                type="number" required min="0" step="0.01"
+                value={precio} onChange={e => setPrecio(e.target.value)}
+              />
+              <SelectField 
+                label="Unidad de Medida"
+                value={unidad} onChange={e => setUnidad(e.target.value)}
+                options={[
+                  { value: 'por hoja', label: 'Por hoja' },
+                  { value: 'por unidad', label: 'Por unidad' }
+                ]}
+              />
             </div>
           </div>
         )}
@@ -202,13 +181,13 @@ export default function FormularioAbmPage() {
           <ActionButton type="button" onClick={() => navigate(-1)} variant="secondary">
             Cancelar
           </ActionButton>
-          <button 
+          <ActionButton 
             type="submit" 
+            variant="primary"
             disabled={isSaving}
-            className="px-5 py-2.5 bg-brand-teal hover:bg-brand-tealHover text-white text-sm font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-50"
           >
             {isSaving ? 'Guardando...' : 'Guardar Cambios'}
-          </button>
+          </ActionButton>
         </div>
       </form>
     </div>

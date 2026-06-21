@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Plus, Trash2, Loader2, User, Phone, ShoppingCart } from 'lucide-react';
 import InputField from '../components/ui/InputField';
 import ActionButton from '../components/ui/ActionButton';
+import SelectField from '../components/ui/SelectField';
+import TextAreaField from '../components/ui/TextAreaField';
 import { preciosService } from '../lib/preciosService';
 import { pedidosService } from '../lib/pedidosService';
 export default function FormularioPedidoPage() {
@@ -162,16 +164,16 @@ export default function FormularioPedidoPage() {
               />
             </div>
             <div className="col-span-1">
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Canal de Venta</label>
-              <select
-                className="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition-all outline-none"
+              <SelectField 
+                label="Canal de Venta"
                 value={canalVenta}
                 onChange={(e) => setCanalVenta(e.target.value)}
-              >
-                <option value="LOCAL">Local Físico</option>
-                <option value="IG">Instagram</option>
-                <option value="WPP">WhatsApp</option>
-              </select>
+                options={[
+                  { value: 'LOCAL', label: 'Local Físico' },
+                  { value: 'IG', label: 'Instagram' },
+                  { value: 'WPP', label: 'WhatsApp' }
+                ]}
+              />
             </div>
           </div>
         </div>
@@ -208,26 +210,23 @@ export default function FormularioPedidoPage() {
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                   {/* Fila 1: Servicio, Cantidad y Subtotal */}
                   <div className="col-span-1 md:col-span-7">
-                    <label className="block text-xs font-semibold text-slate-500 mb-1">Servicio *</label>
-                    <select
-                      className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:border-brand-teal outline-none"
+                    <SelectField 
+                      label="Servicio *"
                       value={detalle.precio_id}
                       onChange={(e) => handleDetalleChange(detalle.id_local, 'precio_id', e.target.value)}
                       required
-                    >
-                      <option value="">-- Seleccionar --</option>
-                      {preciosDB.map(p => (
-                        <option key={p.id} value={p.id}>{p.servicio} (${p.precio})</option>
-                      ))}
-                    </select>
+                      options={[
+                        { value: '', label: '-- Seleccionar --' },
+                        ...preciosDB.map(p => ({ value: p.id, label: `${p.servicio} ($${p.precio})` }))
+                      ]}
+                    />
                   </div>
 
                   <div className="col-span-1 md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-500 mb-1">Cantidad *</label>
-                    <input
+                    <InputField 
+                      label="Cantidad *"
                       type="number"
                       min="1"
-                      className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:border-brand-teal outline-none"
                       value={detalle.cantidad}
                       onChange={(e) => handleDetalleChange(detalle.id_local, 'cantidad', parseInt(e.target.value) || 1)}
                     />
@@ -240,10 +239,8 @@ export default function FormularioPedidoPage() {
 
                   {/* Fila 2: Descripción Adicional (ancho completo) */}
                   <div className="col-span-1 md:col-span-12 mt-2">
-                    <label className="block text-xs font-semibold text-slate-500 mb-1">Detalle / Notas (Opcional)</label>
-                    <textarea
-                      className="w-full p-3 rounded-lg border border-slate-200 text-sm focus:border-brand-teal outline-none resize-none custom-scrollbar"
-                      rows="2"
+                    <TextAreaField 
+                      label="Detalle / Notas (Opcional)"
                       placeholder="Ej. Anillado color negro, tapa transparente, retirar a las 15hs..."
                       value={detalle.descripcion}
                       onChange={(e) => handleDetalleChange(detalle.id_local, 'descripcion', e.target.value)}
